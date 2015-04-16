@@ -186,12 +186,16 @@ struct MaxAlign { char c; } __attribute__((__aligned__));
 #include <folly/detail/Clock.h>
 #endif
 
-// Provide our own std::__throw_* wrappers for platforms that don't have them
-#if FOLLY_HAVE_BITS_FUNCTEXCEPT_H
-#include <bits/functexcept.h>
-#else
-#include <folly/detail/FunctionalExcept.h>
-#endif
+
+// FIXME(Nicolas Despres): Commented because FunctionalExcept is not header
+//  only and <bits/functexcept.h> is not found by Apple clang-602.0.49 whereas
+//  it is present in '/usr/include/c++/4.2.1'...
+// // Provide our own std::__throw_* wrappers for platforms that don't have them
+// #if FOLLY_HAVE_BITS_FUNCTEXCEPT_H
+// #include <bits/functexcept.h>
+// #else
+// #include <folly/detail/FunctionalExcept.h>
+// #endif
 
 #if defined(__cplusplus)
 // Unfortunately, boost::has_trivial_copy<T> is broken in libc++ due to its
