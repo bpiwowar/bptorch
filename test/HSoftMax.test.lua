@@ -1,4 +1,4 @@
-NOOPTIM = true
+NOOPTIM = false
 require 'bptorch'
 
 
@@ -45,7 +45,7 @@ input = torch.expand(x, words:size(1), input_size)
 output = hs:forward({input, words})
 -- print(output)
 
-s = torch.sum(output:exp()) 
+s = torch.sum(output:exp())
 delta = torch.abs(s - 1)
 print("[batch] sum(p) = " .. s)
 assert(delta < 1e-10, "Sum of probabilities should be 1, but |p - 1| is " .. delta)
@@ -66,9 +66,12 @@ targets = torch.LongTensor(ninput)
 targets:random(nleaves)
 
 function test_time()
+    local ntimes = 10
     timer = torch.Timer() -- the Timer starts to count now
-    output = hs:updateOutput({input, targets})
-    print('Time elapsed for ' .. ninput ..' inputs: ' .. timer:time().real .. ' seconds')
+    for i=1,ntimes do
+      output = hs:updateOutput({input, targets})
+    end
+    print('Time elapsed for ' .. ninput ..' inputs: ' .. timer:time().real / ntimes .. ' seconds, input size = ' .. (input:size(1)) .. "x" .. (input:size(2)) .. " , # leaves = " .. nleaves)
 end
 test_time()
 
@@ -111,7 +114,7 @@ function test_gradient()
     grad = hs.gradInput[1]:clone()
 
     for i = 1, 2 do
-      delta = torch.randn(ninput, input_size) 
+      delta = torch.randn(ninput, input_size)
 
       for i, eps in pairs({1, 1e-1, 1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-14}) do
         input_delta = input:clone()
@@ -120,7 +123,7 @@ function test_gradient()
         local output = hs:updateOutput({input_delta, targets})
         local err_eps = criterion:forward(output, nil)
 
-        delta_err = delta:clone()    
+        delta_err = delta:clone()
         delta_err:cmul(grad)
 
         -- print(delta:sum())
